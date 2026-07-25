@@ -28,7 +28,7 @@ interface LocationState {
  * headed. Already-authenticated visitors are redirected away.
  */
 export function LoginPage() {
-  const { isAuthenticated, isLoading, signIn } = useSession();
+  const { isAuthenticated, isLoading, isResolvingRoles, isPlatformAdmin, isPlanner, signIn } = useSession();
   const notifications = useNotifications();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
@@ -38,10 +38,18 @@ export function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
-  if (isLoading) return <LoadingPage label="Restaurando sesión…" />;
+  if (isLoading || (isAuthenticated && isResolvingRoles)) {
+    return <LoadingPage label="Restaurando sesión…" />;
+  }
   if (isAuthenticated) {
-    const to = (location.state as LocationState | null)?.from?.pathname ?? '/';
-    return <Navigate to={to} replace />;
+    // Route each role to its home. Admin priority; planner to /planner; neither
+    // to "/" where ProtectedRoute renders a clean access-denied.
+    if (isPlatformAdmin) {
+      const to = (location.state as LocationState | null)?.from?.pathname ?? '/';
+      return <Navigate to={to} replace />;
+    }
+    if (isPlanner) return <Navigate to="/planner" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const onSubmit = async (values: FormValues) => {

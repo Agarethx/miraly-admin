@@ -3,6 +3,11 @@ import { AppProviders } from '@/shared/providers/AppProviders';
 import { AppLayout } from '@/shared/layouts/AppLayout';
 import { ProtectedRoute } from '@/modules/auth/ProtectedRoute';
 import { LoginPage } from '@/modules/auth/LoginPage';
+import { PlannerGuard } from '@/modules/planner/PlannerGuard';
+import { PlannerLayout } from '@/modules/planner/PlannerLayout';
+import { PlannerEventsPage } from '@/modules/planner/PlannerEventsPage';
+import { PlannerCreateEventPage } from '@/modules/planner/PlannerCreateEventPage';
+import { PlannerPayEventPage } from '@/modules/planner/PlannerPayEventPage';
 import { NotFoundPage } from '@/shared/components/NotFoundPage';
 
 import { DashboardPage } from '@/modules/dashboard/DashboardPage';
@@ -41,6 +46,15 @@ export function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+
+          {/* Planner portal — separate tree, its own guard (planners, not admins). */}
+          <Route path="/planner" element={<PlannerGuard />}>
+            <Route element={<PlannerLayout />}>
+              <Route index element={<PlannerEventsPage />} />
+              <Route path="events/new" element={<PlannerCreateEventPage />} />
+              <Route path="events/:eventId/pay" element={<PlannerPayEventPage />} />
+            </Route>
+          </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
