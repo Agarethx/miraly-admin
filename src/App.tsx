@@ -8,6 +8,7 @@ import { PlannerLayout } from '@/modules/planner/PlannerLayout';
 import { PlannerEventsPage } from '@/modules/planner/PlannerEventsPage';
 import { PlannerCreateEventPage } from '@/modules/planner/PlannerCreateEventPage';
 import { PlannerPayEventPage } from '@/modules/planner/PlannerPayEventPage';
+import { PlannerEventDetailPage } from '@/modules/planner/PlannerEventDetailPage';
 import { NotFoundPage } from '@/shared/components/NotFoundPage';
 
 import { DashboardPage } from '@/modules/dashboard/DashboardPage';
@@ -52,6 +53,7 @@ export function App() {
             <Route element={<PlannerLayout />}>
               <Route index element={<PlannerEventsPage />} />
               <Route path="events/new" element={<PlannerCreateEventPage />} />
+              <Route path="events/:eventId" element={<PlannerEventDetailPage />} />
               <Route path="events/:eventId/pay" element={<PlannerPayEventPage />} />
             </Route>
           </Route>

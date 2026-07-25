@@ -28,9 +28,9 @@ function formatDate(iso: string | null): string {
   return d.toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function EventRow({ event, onPay }: { event: PlannerEvent; onPay: () => void }) {
+function EventRow({ event, onOpen, onPay }: { event: PlannerEvent; onOpen: () => void; onPay: () => void }) {
   return (
-    <Card>
+    <Card onClick={onOpen} className="cursor-pointer transition-colors hover:bg-secondary/40">
       <CardContent className="flex items-center justify-between gap-4 py-4">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{event.name}</p>
@@ -50,7 +50,13 @@ function EventRow({ event, onPay }: { event: PlannerEvent; onPay: () => void }) 
             {STATUS_LABEL[event.status] ?? event.status}
           </Badge>
           {event.status === 'draft' ? (
-            <Button size="sm" onClick={onPay}>
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPay();
+              }}
+            >
               Activar / Pagar
             </Button>
           ) : null}
@@ -100,7 +106,12 @@ export function PlannerEventsPage() {
       ) : (
         <div className="space-y-3">
           {data!.map((e) => (
-            <EventRow key={e.id} event={e} onPay={() => navigate(`/planner/events/${e.id}/pay`)} />
+            <EventRow
+              key={e.id}
+              event={e}
+              onOpen={() => navigate(`/planner/events/${e.id}`)}
+              onPay={() => navigate(`/planner/events/${e.id}/pay`)}
+            />
           ))}
         </div>
       )}
