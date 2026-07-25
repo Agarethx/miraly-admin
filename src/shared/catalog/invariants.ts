@@ -24,9 +24,9 @@ export function assertValidProductWriteBase(model: ProductWriteBase): void {
     }
   }
 
-  const currencies = model.prices.map((p) => `${p.currency}:${p.region ?? ''}`);
+  const currencies = model.prices.map((p) => `${p.currency}:${p.region ?? ''}:${p.audience ?? 'standard'}`);
   if (new Set(currencies).size !== currencies.length) {
-    throw new CatalogValidationError('No puede haber precios duplicados para la misma moneda y región.');
+    throw new CatalogValidationError('No puede haber precios duplicados para la misma moneda, región y audiencia.');
   }
 
   for (const limit of model.limits) {

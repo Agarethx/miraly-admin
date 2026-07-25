@@ -18,11 +18,20 @@ export type ProductVisibility = 'public' | 'private' | 'hidden';
 export const PRODUCT_STATUSES: readonly ProductStatus[] = ['draft', 'active', 'archived'];
 export const PRODUCT_VISIBILITIES: readonly ProductVisibility[] = ['public', 'private', 'hidden'];
 
+/**
+ * Price audience — which customer a price applies to. 'standard' is the default
+ * price every product carries; 'planner' is an optional reduced price for
+ * WEDDING_PLANNER accounts (billing_product_prices.audience). Absent = standard.
+ */
+export type PriceAudience = 'standard' | 'planner';
+
 /** Money — integer minor units + ISO-4217 currency, never float. */
 export interface Money {
   currency: string;
   amountMinor: number;
   region: string | null;
+  /** Optional; defaults to 'standard' on read/write. */
+  audience?: PriceAudience;
 }
 
 /**

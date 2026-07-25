@@ -1,4 +1,4 @@
-import type { LimitEffect, Money, ProductStatus, ProductVisibility } from './product';
+import type { LimitEffect, Money, PriceAudience, ProductStatus, ProductVisibility } from './product';
 import type { LimitEffectRow, PriceRow, ProductRowBase } from './rows';
 
 /**
@@ -15,17 +15,25 @@ export function toVisibility(value: string): ProductVisibility {
 }
 
 export function toMoney(row: PriceRow): Money {
-  return { currency: row.currency, amountMinor: row.amount_minor, region: row.region };
+  return {
+    currency: row.currency,
+    amountMinor: row.amount_minor,
+    region: row.region,
+    audience: (row.audience ?? 'standard') as PriceAudience,
+  };
 }
 
 export function toLimits(rows: LimitEffectRow[]): LimitEffect[] {
   return rows.map((r) => ({ limitTypeCode: r.limit_type_code, deltaQty: r.delta_qty }));
 }
 
-/** Deterministic primary price: region-less first, then lowest currency code. */
+/** Deterministic primary price: standard audience first, then region-less, then lowest currency. */
 export function pickPrimaryPrice(prices: Money[]): Money | null {
   if (prices.length === 0) return null;
   return [...prices].sort((a, b) => {
+    const aStd = (a.audience ?? 'standard') === 'standard';
+    const bStd = (b.audience ?? 'standard') === 'standard';
+    if (aStd !== bStd) return aStd ? -1 : 1;
     if ((a.region === null) !== (b.region === null)) return a.region === null ? -1 : 1;
     return a.currency.localeCompare(b.currency);
   })[0];

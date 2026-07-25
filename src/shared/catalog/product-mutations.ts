@@ -36,6 +36,7 @@ export async function replacePrices(
       currency: p.currency,
       amount_minor: p.amountMinor,
       region: p.region,
+      audience: p.audience ?? 'standard',
     })),
   );
   if (ins.error) fail(ins.error, config, productId);
@@ -186,6 +187,7 @@ export async function duplicateProductBase(
         currency: p.currency,
         amount_minor: p.amount_minor,
         region: p.region,
+        audience: p.audience ?? 'standard',
       })),
     );
     if (ins.error) fail(ins.error, config, newId);

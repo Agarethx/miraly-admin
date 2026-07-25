@@ -9,6 +9,8 @@ export interface PriceRow {
   currency: string;
   amount_minor: number;
   region: string | null;
+  /** 'standard' | 'planner'. May be absent on legacy reads; treat as 'standard'. */
+  audience?: string | null;
 }
 
 export interface LimitEffectRow {
@@ -40,7 +42,7 @@ export function buildProductSelect(extra = ''): string {
   return `
     id, product_type, name, description, status, visibility, sort_order, version,
     created_at, updated_at, deleted_at,
-    prices:billing_product_prices(currency, amount_minor, region),
+    prices:billing_product_prices(currency, amount_minor, region, audience),
     limits:billing_product_limit_effects(limit_type_code, delta_qty)${extra ? `,\n${extra}` : ''}
   `;
 }

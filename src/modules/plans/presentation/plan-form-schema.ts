@@ -5,6 +5,7 @@ import {
   limitValue,
   localized,
   type LocalizedText,
+  type Money,
   type Plan,
   type PlanLimit,
   type PlanWriteModel,
@@ -62,6 +63,8 @@ export const planFormSchema = z.object({
   amount: z.coerce
     .number({ invalid_type_error: 'Ingresa un monto válido.' })
     .min(0, 'El precio no puede ser negativo.'),
+  /** Optional reduced price for wedding planners; same currency as `amount`. */
+  plannerAmount: optionalNonNegNumber,
 
   guests: optionalNonNegInt,
   storageGb: optionalNonNegNumber,
@@ -81,6 +84,7 @@ export const emptyPlanForm: PlanFormValues = {
   sortOrder: 0,
   currency: 'CLP',
   amount: 0,
+  plannerAmount: undefined,
   guests: undefined,
   storageGb: undefined,
   retentionDays: undefined,
@@ -88,7 +92,8 @@ export const emptyPlanForm: PlanFormValues = {
 
 /** Hydrates the form from an existing plan (edit screen). */
 export function planToFormValues(plan: Plan): PlanFormValues {
-  const price = plan.prices[0] ?? null;
+  const standard = plan.prices.find((p) => (p.audience ?? 'standard') === 'standard') ?? plan.prices[0] ?? null;
+  const planner = plan.prices.find((p) => p.audience === 'planner') ?? null;
   return {
     nameEs: localized(plan.name, 'es'),
     nameEn: plan.name.en ?? '',
@@ -97,8 +102,9 @@ export function planToFormValues(plan: Plan): PlanFormValues {
     status: plan.status === 'active' ? 'active' : 'draft',
     visibility: plan.visibility,
     sortOrder: plan.sortOrder,
-    currency: price?.currency ?? 'CLP',
-    amount: price ? toMajorUnits(price.amountMinor) : 0,
+    currency: standard?.currency ?? 'CLP',
+    amount: standard ? toMajorUnits(standard.amountMinor) : 0,
+    plannerAmount: planner ? toMajorUnits(planner.amountMinor) : undefined,
     guests: limitValue(plan.limits, LIMIT_CODES.guests) ?? undefined,
     storageGb:
       limitValue(plan.limits, LIMIT_CODES.storageBytes) !== null
@@ -132,13 +138,27 @@ export function formValuesToWriteModel(values: PlanFormValues): PlanWriteModel {
       ? buildLocalized(values.descriptionEs ?? '', values.descriptionEn)
       : null;
 
+  // Standard price always; planner price only when a planner amount is given.
+  // Same currency and region=null as standard, consistent with billing_price_for.
+  const prices: Money[] = [
+    { currency: values.currency, amountMinor: toMinorUnits(values.amount), region: null, audience: 'standard' },
+  ];
+  if (values.plannerAmount !== undefined) {
+    prices.push({
+      currency: values.currency,
+      amountMinor: toMinorUnits(values.plannerAmount),
+      region: null,
+      audience: 'planner',
+    });
+  }
+
   return {
     name: buildLocalized(values.nameEs, values.nameEn),
     description,
     status: values.status,
     visibility: values.visibility,
     sortOrder: values.sortOrder,
-    prices: [{ currency: values.currency, amountMinor: toMinorUnits(values.amount), region: null }],
+    prices,
     limits,
   };
 }

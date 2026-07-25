@@ -119,6 +119,14 @@ export function PlanForm({ defaultValues, submitLabel, submitting, onSubmit, onC
           >
             <Input id="amount" type="number" min={0} step="0.01" {...register('amount')} />
           </FormField>
+          <FormField
+            label="Precio planner (opcional)"
+            htmlFor="plannerAmount"
+            error={errors.plannerAmount?.message}
+            hint="Precio reducido para wedding planners, misma moneda. Vacío = usa el estándar."
+          >
+            <Input id="plannerAmount" type="number" min={0} step="0.01" {...register('plannerAmount')} />
+          </FormField>
         </CardContent>
       </Card>
 
